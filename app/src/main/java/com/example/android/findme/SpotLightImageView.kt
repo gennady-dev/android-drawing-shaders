@@ -3,6 +3,7 @@ package com.example.android.findme
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatImageView
 import kotlin.math.floor
 import kotlin.random.Random
@@ -27,6 +28,8 @@ class SpotLightImageView @JvmOverloads constructor(
 
     private lateinit var shader: Shader
 
+    private val shaderMatrix = Matrix()
+
     init {
         val bitmap = Bitmap.createBitmap(spotlight.width, spotlight.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -42,6 +45,48 @@ class SpotLightImageView @JvmOverloads constructor(
 
         shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
         paint.shader = shader
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawBitmap(bitmapAndroid, androidBitmapX, androidBitmapY, paint)
+    }
+    override fun onSizeChanged(
+        newWidth: Int,
+        newHeight: Int,
+        oldWidth: Int,
+        oldHeight: Int
+    ) {
+        super.onSizeChanged(newWidth, newHeight, oldWidth, oldHeight)
+        setupWinnerRect()
+    }
+
+    override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
+        val motionEventX = motionEvent.x
+        val motionEventY = motionEvent.y
+
+        when (motionEvent.action) {
+            MotionEvent.ACTION_DOWN -> {
+                shouldDrawSpotLight = true
+                if (gameOver) {
+                    // New Game
+                    gameOver = false
+                    setupWinnerRect()
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                shouldDrawSpotLight = false
+                gameOver = winnerRect.contains(motionEventX, motionEventY)
+            }
+        }
+        shaderMatrix.setTranslate(
+            motionEventX - spotlight.width / 2.0f,
+            motionEventY - spotlight.height / 2.0f
+        )
+        shader.setLocalMatrix(shaderMatrix)
+        invalidate()
+        return true
     }
 
     private fun setupWinnerRect() {
