@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import kotlin.math.floor
+import kotlin.random.Random
 
 class SpotLightImageView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -40,6 +42,18 @@ class SpotLightImageView @JvmOverloads constructor(
 
         shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
         paint.shader = shader
+    }
+
+    private fun setupWinnerRect() {
+        androidBitmapX = floor(Random.nextFloat() * (width - bitmapAndroid.width))
+        androidBitmapY = floor(Random.nextFloat() * (height - bitmapAndroid.height))
+
+        winnerRect = RectF(
+            (androidBitmapX),
+            (androidBitmapY),
+            (androidBitmapX + bitmapAndroid.width),
+            (androidBitmapY + bitmapAndroid.height)
+        )
     }
 
 }
